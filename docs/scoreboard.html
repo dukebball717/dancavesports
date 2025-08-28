@@ -30,22 +30,28 @@
     display: flex;
     flex-direction: column;
     animation: scroll 30s linear infinite;
-    height: calc(100vh - 80px); /* full screen minus header */
+    height: calc(100vh - 80px);
   }
 
   .game {
     display: flex;
     justify-content: space-between;
+    align-items: center;
     padding: 30px 50px;
     font-size: 3em;
     border-bottom: 2px solid #444;
   }
 
+  .game span img {
+    vertical-align: middle;
+    margin-right: 10px;
+    height: 50px;
+  }
+
   .league {
     font-size: 2em;
     text-align: center;
-    margin-top: 10px;
-    margin-bottom: 10px;
+    margin: 10px 0;
   }
 
   .live {
@@ -60,82 +66,4 @@
   .MLB { background: #C8102E; color: #fff; }
   .CFB { background: #4B9F4B; color: #fff; }
 
-  @keyframes scroll {
-    0% { transform: translateY(100%); }
-    100% { transform: translateY(-100%); }
-  }
-
-  @keyframes blink {
-    0%, 50%, 100% { opacity: 1; }
-    25%, 75% { opacity: 0; }
-  }
-</style>
-</head>
-<body>
-<div id="header">
-  <span class="logo">DanCave</span>
-  Live Sports Scores
-</div>
-
-<div id="scoreboard">Loading scores...</div>
-
-<script>
-async function fetchScores(url, leagueAbbr) {
-  try {
-    const res = await fetch(url);
-    const data = await res.json();
-    return data.events.map(event => {
-      const comp = event.competitions[0];
-      const home = comp.competitors.find(c => c.homeAway === 'home');
-      const away = comp.competitors.find(c => c.homeAway === 'away');
-      const status = comp.status ? comp.status.type.state : '';
-      const isLive = (status === 'in') || (status === 'inprogress');
-      return {
-        home: home.team.displayName,
-        away: away.team.displayName,
-        homeScore: home.score || 0,
-        awayScore: away.score || 0,
-        league: leagueAbbr,
-        live: isLive
-      };
-    });
-  } catch (err) {
-    console.error('Failed to fetch scores from', url, err);
-    return [];
-  }
-}
-
-async function updateScoreboard() {
-  const nfl = await fetchScores('https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard', 'NFL');
-  const cfb = await fetchScores('https://site.api.espn.com/apis/site/v2/sports/football/college-football/scoreboard', 'CFB');
-  const mlb = await fetchScores('https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/scoreboard', 'MLB');
-
-  const allGames = [...nfl, ...cfb, ...mlb];
-  if (allGames.length === 0) {
-    document.getElementById('scoreboard').innerHTML = 'No games currently.';
-    return;
-  }
-
-  // Duplicate the list for seamless scrolling
-  const html = allGames.map(game => `
-    <div class="game ${game.league}">
-      <span>${game.away} ${game.awayScore}</span>
-      <span>${game.home} ${game.homeScore} ${game.live ? '<span class="live">LIVE</span>' : ''}</span>
-    </div>
-    <div class="league ${game.league}">${game.league}</div>
-  `).join('') + allGames.map(game => `
-    <div class="game ${game.league}">
-      <span>${game.away} ${game.awayScore}</span>
-      <span>${game.home} ${game.homeScore} ${game.live ? '<span class="live">LIVE</span>' : ''}</span>
-    </div>
-    <div class="league ${game.league}">${game.league}</div>
-  `).join('');
-
-  document.getElementById('scoreboard').innerHTML = html;
-}
-
-updateScoreboard();
-setInterval(updateScoreboard, 60000);
-</script>
-</body>
-</html>
+  @k
